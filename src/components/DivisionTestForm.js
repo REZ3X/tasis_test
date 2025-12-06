@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { FaCheckCircle, FaUpload, FaTrash, FaArrowRight, FaArrowLeft } from 'react-icons/fa';
 
@@ -64,18 +64,72 @@ const DIVISIONS = [
 ];
 
 export default function DivisionTestForm() {
-    const [step, setStep] = useState('welcome'); const [formData, setFormData] = useState({
-        nama: '',
-        kelas: '',
-        priority1: '',
-        priority2: '',
-        priority3: '',
-        answers: {}
+    const [step, setStep] = useState(() => {
+        if (typeof window !== 'undefined') {
+            const saved = localStorage.getItem('tasis_test_step');
+            return saved || 'welcome';
+        }
+        return 'welcome';
     });
+
+    const [formData, setFormData] = useState(() => {
+        if (typeof window !== 'undefined') {
+            const saved = localStorage.getItem('tasis_test_formData');
+            return saved ? JSON.parse(saved) : {
+                nama: '',
+                kelas: '',
+                priority1: '',
+                priority2: '',
+                priority3: '',
+                answers: {}
+            };
+        }
+        return {
+            nama: '',
+            kelas: '',
+            priority1: '',
+            priority2: '',
+            priority3: '',
+            answers: {}
+        };
+    });
+
     const [files, setFiles] = useState({});
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
-    const [acceptedDisclaimer, setAcceptedDisclaimer] = useState(false);
+    const [acceptedDisclaimer, setAcceptedDisclaimer] = useState(() => {
+        if (typeof window !== 'undefined') {
+            const saved = localStorage.getItem('tasis_test_disclaimer');
+            return saved === 'true';
+        }
+        return false;
+    });
+
+    useEffect(() => {
+        if (typeof window !== 'undefined' && step !== 'welcome' && step !== 'submitted') {
+            localStorage.setItem('tasis_test_step', step);
+        }
+    }, [step]);
+
+    useEffect(() => {
+        if (typeof window !== 'undefined' && (formData.nama || formData.kelas || Object.keys(formData.answers).length > 0)) {
+            localStorage.setItem('tasis_test_formData', JSON.stringify(formData));
+        }
+    }, [formData]);
+
+    useEffect(() => {
+        if (typeof window !== 'undefined' && acceptedDisclaimer) {
+            localStorage.setItem('tasis_test_disclaimer', 'true');
+        }
+    }, [acceptedDisclaimer]);
+
+    const clearSavedData = () => {
+        if (typeof window !== 'undefined') {
+            localStorage.removeItem('tasis_test_step');
+            localStorage.removeItem('tasis_test_formData');
+            localStorage.removeItem('tasis_test_disclaimer');
+        }
+    };
 
     const getAvailableDivisions = (excludeIds = []) => {
         return DIVISIONS.filter(div => !excludeIds.includes(div.id));
@@ -119,6 +173,7 @@ export default function DivisionTestForm() {
             const data = await response.json();
 
             if (data.success) {
+                clearSavedData();
                 setStep('submitted');
             } else {
                 setError('Gagal mengirim data. Silakan coba lagi.');
@@ -190,6 +245,33 @@ export default function DivisionTestForm() {
                             </div>
                         </div>
                     </div>
+
+                    {/* Saved Progress Notice */}
+                    {formData.nama && (
+                        <div className="mb-4 p-4 rounded-lg" style={{ backgroundColor: '#2a2f36', border: '2px solid #ebae3b' }}>
+                            <div className="flex items-start gap-3">
+                                <FaCheckCircle style={{ color: '#ebae3b', fontSize: '1.25rem', marginTop: '2px' }} />
+                                <div>
+                                    <p className="text-sm font-bold mb-2" style={{ color: '#ebae3b' }}>
+                                        Data tersimpan ditemukan!
+                                    </p>
+                                    <p className="text-xs sm:text-sm mb-3" style={{ color: '#f2f3ff' }}>
+                                        Kami menemukan data yang kamu isi sebelumnya. Kamu bisa melanjutkan dari terakhir kali atau mulai dari awal.
+                                    </p>
+                                    <button
+                                        onClick={() => {
+                                            clearSavedData();
+                                            window.location.reload();
+                                        }}
+                                        className="text-xs sm:text-sm font-bold px-3 py-2 rounded hover:opacity-80 transition-all"
+                                        style={{ backgroundColor: '#584928', color: '#f2f3ff' }}
+                                    >
+                                        Mulai dari Awal
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                     <div className="mb-6 p-4 rounded-lg" style={{ backgroundColor: '#2a2f36', border: '2px solid #3d321c' }}>
                         <label className="flex items-start gap-4 cursor-pointer group">

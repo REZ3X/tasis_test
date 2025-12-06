@@ -404,6 +404,7 @@ export default function DivisionTestForm() {
                                 required
                                 value={formData.nama}
                                 onChange={(e) => setFormData({ ...formData, nama: e.target.value })}
+                                placeholder="Rejaka Abimanyu Susanto"
                                 className="w-full px-3 sm:px-4 py-2 sm:py-3 border-2 rounded-lg focus:outline-none focus:ring-2 focus:border-yellow-600 font-medium text-sm sm:text-base"
                                 style={{
                                     backgroundColor: '#2a2f36',
@@ -422,7 +423,7 @@ export default function DivisionTestForm() {
                                 required
                                 value={formData.kelas}
                                 onChange={(e) => setFormData({ ...formData, kelas: e.target.value })}
-                                placeholder="Contoh: 11 PPLG 1"
+                                placeholder="Contoh: XII SIJA B"
                                 className="w-full px-3 sm:px-4 py-2 sm:py-3 border-2 rounded-lg focus:outline-none focus:ring-2 focus:border-yellow-600 font-medium text-sm sm:text-base"
                                 style={{
                                     backgroundColor: '#2a2f36',

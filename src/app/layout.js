@@ -15,7 +15,7 @@ export const metadata = {
     siteName: "TASIS Division Test",
     images: [
       {
-        url: "/logo.svg",
+        url: "/og-image.png",
         width: 1200,
         height: 630,
         alt: "TASIS Logo - Tata Tertib Siswa",
